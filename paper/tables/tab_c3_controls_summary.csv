@@ -1,0 +1,9 @@
+contrast,n_cells,mean_pp,ci_low_pp,ci_high_pp,cells
+all14,14,2.2909936831503486,1.0689229167942238,3.702636686614371,1.5B|gsm8k|main;3B|gsm8k|main;7B|gsm8k|main;Llama3B|gsm8k|main;1.5B|gsm_symbolic|main;3B|gsm_symbolic|main;7B|gsm_symbolic|main;1.5B|gsm_symbolic|p2;3B|gsm_symbolic|p2;7B|gsm_symbolic|p2;1.5B|math500|main;3B|math500|main;7B|math500|main;Llama3B|math500|main
+seed6_cfg_full,6,1.5833333333333333,0.41666666666666624,2.888888888888889,1.5B|gsm8k|main;3B|gsm8k|main;7B|gsm8k|main;1.5B|math500|main;3B|math500|main;7B|math500|main
+seed6_cfg_joint,6,1.5898692810457515,0.41666666666666624,2.900093370681606,1.5B|gsm8k|main;3B|gsm8k|main;7B|gsm8k|main;1.5B|math500|main;3B|math500|main;7B|math500|main
+seed6_seed_cd,6,2.0081699346405233,0.6111111111111119,3.516339869281046,1.5B|gsm8k|main;3B|gsm8k|main;7B|gsm8k|main;1.5B|math500|main;3B|math500|main;7B|math500|main
+seed6_sc3n,6,1.200980392156863,0.2222222222222233,2.181139122315592,1.5B|gsm8k|main;3B|gsm8k|main;7B|gsm8k|main;1.5B|math500|main;3B|math500|main;7B|math500|main
+seed6_cfg_minus_seed,6,-0.4183006535947716,-1.1958450046685352,0.2770774976657323,1.5B|gsm8k|main;3B|gsm8k|main;7B|gsm8k|main;1.5B|math500|main;3B|math500|main;7B|math500|main
+seed6_cfg_minus_sc3n,6,0.3888888888888886,-0.11134453781512714,0.88889472455649,1.5B|gsm8k|main;3B|gsm8k|main;7B|gsm8k|main;1.5B|math500|main;3B|math500|main;7B|math500|main
+noseed8_cfg,8,2.8217389455131103,0.9362211671497234,4.930607604537455,Llama3B|gsm8k|main;1.5B|gsm_symbolic|main;3B|gsm_symbolic|main;7B|gsm_symbolic|main;1.5B|gsm_symbolic|p2;3B|gsm_symbolic|p2;7B|gsm_symbolic|p2;Llama3B|math500|main

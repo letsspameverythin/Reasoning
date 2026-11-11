@@ -1,0 +1,7 @@
+dataset,subset,model,n_seeds,config_range_pp,seed_range_pp,config_minus_seed_pp,p_config_range_le_seed_null,config_exceeds_obs_seed_range,p4_gate_3pp,p4_survives_seed_null_05,pi_c0_seed0,pi_c0_seed1,pi_c0_seed2,pi_c1_seed0,pi_c2_seed0
+gsm8k,main,Qwen/Qwen2.5-1.5B-Instruct,3,6.499999999999995,4.133165829145735,2.3668341708542595,0.0,True,True,True,0.745,0.775,0.7336683417085427,0.735,0.68
+gsm8k,main,Qwen/Qwen2.5-3B-Instruct,3,0.5000000000000004,0.5000000000000004,0.0,0.6686,False,False,False,0.91,0.915,0.91,0.905,0.91
+gsm8k,main,Qwen/Qwen2.5-7B-Instruct,3,6.499999999999995,0.5000000000000004,5.999999999999995,0.0,True,True,True,0.945,0.95,0.95,0.935,0.88
+math500,,Qwen/Qwen2.5-1.5B-Instruct,3,2.9999999999999916,1.2839195979899465,1.716080402010045,0.0,True,False,False,0.56,0.5678391959798995,0.555,0.54,0.57
+math500,,Qwen/Qwen2.5-3B-Instruct,3,1.0000000000000009,2.0000000000000018,-1.0000000000000009,0.8864,False,False,False,0.76,0.74,0.75,0.765,0.755
+math500,,Qwen/Qwen2.5-7B-Instruct,3,1.9999999999999907,0.5000000000000004,1.4999999999999902,0.0,True,False,False,0.82,0.815,0.82,0.8,0.815

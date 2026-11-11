@@ -1,0 +1,43 @@
+defaults: ../base.yaml
+
+# Seed-expansion P0: c0 replicate seed=1.
+# Matches results_fp16 configured_sampling c0 conventions (N=24, T=0.8,
+# max_new_tokens=1024, subsample_seed=1234). Elicitation c0 applies
+# top_p=0.95 at decode; generation.top_p stays at base 1.0 for hash parity.
+# defaults path is relative to this file (configs/seed_expansion/).
+model:
+  name_or_path: Qwen/Qwen2.5-1.5B-Instruct
+  backend: hf
+  dtype: float16
+
+data:
+  name: gsm_symbolic
+  split: test
+  subset: main
+  subsample: 150
+  subsample_seed: 1234
+
+generation:
+  max_new_tokens: 1024
+  temperature: 0.8
+
+strategy:
+  name: configured_sampling
+  params:
+    n_samples: 24
+    batch_calls: true
+
+elicitation:
+  id: c0
+
+runtime:
+  seed: 1
+  out_dir: results_fp16
+  time_budget_hours: 11.0
+  reserve_minutes: 10.0
+  grade_after_run: true
+
+tags:
+  paper_cell: gsm_symbolic
+  seed_expansion: p0
+  seed_expansion_cell: qwen1.5b/gsm_symbolic_main

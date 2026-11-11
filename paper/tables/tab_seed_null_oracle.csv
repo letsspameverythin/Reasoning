@@ -1,0 +1,7 @@
+acc_seed0,acc_seed_oracle,dataset,gap_seed_oracle_minus_seed0,model,n_items,n_seeds,null_kind,subset
+0.7487437185929648,0.8592964824120602,gsm8k,0.11055276381909548,Qwen/Qwen2.5-1.5B-Instruct,199,3,c0_seed_replicates_as_configs,main
+0.91,0.935,gsm8k,0.025,Qwen/Qwen2.5-3B-Instruct,200,3,c0_seed_replicates_as_configs,main
+0.945,0.955,gsm8k,0.01,Qwen/Qwen2.5-7B-Instruct,200,3,c0_seed_replicates_as_configs,main
+0.5628140703517588,0.628140703517588,math500,0.06532663316582915,Qwen/Qwen2.5-1.5B-Instruct,199,3,c0_seed_replicates_as_configs,
+0.76,0.795,math500,0.035,Qwen/Qwen2.5-3B-Instruct,200,3,c0_seed_replicates_as_configs,
+0.82,0.845,math500,0.025,Qwen/Qwen2.5-7B-Instruct,200,3,c0_seed_replicates_as_configs,
