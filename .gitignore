@@ -9,7 +9,7 @@ __pycache__/
 # Experiment outputs. Results are data, not source: carry them between Kaggle
 # sessions as a zip / Kaggle Dataset, not through git.
 results/
-results_*/
+results_bundle/
 paper_assets/
 assets/
 *_bundle.zip
