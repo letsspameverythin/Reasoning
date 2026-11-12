@@ -59,7 +59,7 @@
       "overrides": {}
     },
     "runtime": {
-      "out_dir": "/kaggle/working/results_fp16",
+      "out_dir": "results_fp16",
       "run_name": null,
       "seed": 1,
       "time_budget_hours": 11.0,
@@ -83,15 +83,15 @@
   },
   "schema_version": 1,
   "created_at": "2026-11-11T17:01:25+00:00",
-  "updated_at": "2026-11-11T18:07:07+00:00",
+  "updated_at": "2026-11-12T05:52:51+00:00",
   "n_total": 150,
-  "n_completed": 60,
+  "n_completed": 150,
   "n_errors": 0,
-  "elapsed_seconds": 0.0,
-  "gpu_hours": 0.0,
-  "tokens_prompt": 0,
-  "tokens_completion": 0,
-  "status": "running",
+  "elapsed_seconds": 4451.7,
+  "gpu_hours": 1.2366,
+  "tokens_prompt": 8129,
+  "tokens_completion": 636052,
+  "status": "complete",
   "resume_command": "python -m src.runner --config configs/seed_expansion/qwen3b__gsm_symbolic_main__c0__s1.yaml",
   "sessions": [
     {
@@ -130,6 +130,60 @@
         "cpu_count": 4,
         "ram_gb": 31.3,
         "disk_free_gb": 19.4,
+        "is_kaggle": true,
+        "driver": null
+      },
+      "backend": {
+        "backend": "hf",
+        "model": "Qwen/Qwen2.5-3B-Instruct",
+        "revision": null,
+        "dtype": "torch.float16",
+        "load_in_4bit": false,
+        "quant_type": null,
+        "device_map": "auto",
+        "device": "cuda:0",
+        "n_params": 3085938688,
+        "batch_size": 8,
+        "use_chat_template": true,
+        "hardware": "2x GPU [Tesla T4 15GB sm75, Tesla T4 15GB sm75] total 29 GB VRAM, bf16=NO, cuda=13.0, torch=2.11.0+cu130"
+      }
+    },
+    {
+      "started_at": "2026-11-12T04:38:40+00:00",
+      "ended_at": "2026-11-12T05:52:51+00:00",
+      "n_completed": 83,
+      "n_errors": 0,
+      "elapsed_seconds": 4451.7,
+      "gpu_hours": 1.2366,
+      "tokens_prompt": 8129,
+      "tokens_completion": 636052,
+      "stop_reason": "completed",
+      "hardware": {
+        "torch_version": "2.11.0+cu130",
+        "cuda_available": true,
+        "cuda_version": "13.0",
+        "n_gpus": 2,
+        "gpu_names": [
+          "Tesla T4",
+          "Tesla T4"
+        ],
+        "gpu_capabilities": [
+          "75",
+          "75"
+        ],
+        "per_gpu_vram_gb": [
+          14.56,
+          14.56
+        ],
+        "per_gpu_free_gb": [
+          14.36,
+          14.36
+        ],
+        "total_vram_gb": 29.12,
+        "supports_bf16": false,
+        "cpu_count": 4,
+        "ram_gb": 31.3,
+        "disk_free_gb": 19.3,
         "is_kaggle": true,
         "driver": null
       },
