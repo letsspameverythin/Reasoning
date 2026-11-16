@@ -1,0 +1,15 @@
+acc_seed0,acc_seed_oracle,dataset,gap_seed_oracle_minus_seed0,model,n_items,n_seeds,null_kind,subset
+0.7487437185929648,0.8592964824120602,gsm8k,0.11055276381909548,Qwen/Qwen2.5-1.5B-Instruct,199,3,c0_seed_replicates_as_configs,main
+0.91,0.935,gsm8k,0.025,Qwen/Qwen2.5-3B-Instruct,200,3,c0_seed_replicates_as_configs,main
+0.945,0.955,gsm8k,0.01,Qwen/Qwen2.5-7B-Instruct,200,3,c0_seed_replicates_as_configs,main
+0.8994974874371859,0.9246231155778895,gsm8k,0.02512562814070352,meta-llama/Llama-3.2-3B-Instruct,199,3,c0_seed_replicates_as_configs,main
+0.6066666666666667,0.7333333333333333,gsm_symbolic,0.12666666666666668,Qwen/Qwen2.5-1.5B-Instruct,150,3,c0_seed_replicates_as_configs,main
+0.9,0.9133333333333333,gsm_symbolic,0.013333333333333334,Qwen/Qwen2.5-3B-Instruct,150,3,c0_seed_replicates_as_configs,main
+0.8733333333333333,0.9066666666666666,gsm_symbolic,0.03333333333333333,Qwen/Qwen2.5-7B-Instruct,150,3,c0_seed_replicates_as_configs,main
+0.29333333333333333,0.42,gsm_symbolic,0.12666666666666668,Qwen/Qwen2.5-1.5B-Instruct,150,3,c0_seed_replicates_as_configs,p2
+0.66,0.7533333333333333,gsm_symbolic,0.09333333333333334,Qwen/Qwen2.5-3B-Instruct,150,3,c0_seed_replicates_as_configs,p2
+0.8133333333333334,0.8466666666666667,gsm_symbolic,0.03333333333333333,Qwen/Qwen2.5-7B-Instruct,150,3,c0_seed_replicates_as_configs,p2
+0.5628140703517588,0.628140703517588,math500,0.06532663316582915,Qwen/Qwen2.5-1.5B-Instruct,199,3,c0_seed_replicates_as_configs,
+0.76,0.795,math500,0.035,Qwen/Qwen2.5-3B-Instruct,200,3,c0_seed_replicates_as_configs,
+0.82,0.845,math500,0.025,Qwen/Qwen2.5-7B-Instruct,200,3,c0_seed_replicates_as_configs,
+0.59,0.65,math500,0.06,meta-llama/Llama-3.2-3B-Instruct,200,3,c0_seed_replicates_as_configs,

@@ -1,0 +1,28 @@
+loading corpus from results_fp16 à
+16:43:38 WARNING src.analysis.corpus | skipped 200 record(s) with no elicitation configuration; they cannot enter the crossed design
+16:43:38 INFO    src.analysis.corpus | corpus: 13100 cells (+0 auxiliary single-pass), 346264 samples, 4 model(s), 4 config(s), benchmarks [('gsm8k', 'main'), ('gsm_symbolic', 'main'), ('gsm_symbolic', 'p2'), ('math500', None)]
+  13100 cells in 7.8s
+16:43:38 INFO    src.analysis.c3_ties | evaluating main controls under fixed à
+16:43:40 INFO    src.analysis.c3_ties | evaluating main controls under fractional à
+16:43:42 INFO    src.analysis.c3_ties | drop-c2 / two-seed under fixed à
+16:43:43 INFO    src.analysis.c3_ties | drop-c2 / two-seed under fractional à
+16:43:45 INFO    src.analysis.c3_ties | margin-split under fixed à
+16:43:46 INFO    src.analysis.c3_ties | margin-split under fractional à
+16:43:49 INFO    src.analysis.c3_ties | item-joint bootstrap (fractional) B=1000 à
+wrote paper_artefacts\tab_c3_fractional_credit.csv (32 rows)
+wrote paper_artefacts\tab_c3_fractional_vs_fixed.csv (16 rows)
+wrote paper_artefacts\tab_c3_fractional_item_joint.csv
+wrote docs\FRACTIONAL_CREDIT_VERDICT.md
+
+============================================================
+VERDICT: DROP
+Traceback (most recent call last):
+  File "D:\Users\masim\Downloads\Testing\scripts\run_fractional_credit.py", line 325, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "D:\Users\masim\Downloads\Testing\scripts\run_fractional_credit.py", line 309, in main
+    print(verdict["reason"])
+  File "C:\Program Files\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2212' in position 36: character maps to <undefined>

@@ -1,0 +1,16 @@
+dataset,subset,model,n_seeds,config_range_pp,seed_range_pp,config_minus_seed_pp,config_exceeds_seed_range,p_exact_seed_null_27,p_calib_bootstrap,p4_gate_3pp,p4_survives_seed_null_05,n_null_atoms,level,n_cells,n_survivors,n_config_gt_seed,pr_ge_survivors_indep_binom_alpha05,item_boot_B,boot_mean_n_survivors,boot_n_survivors_ci95_low,boot_n_survivors_ci95_high,boot_mean_config_minus_seed_pp,boot_mean_diff_ci95_low,boot_mean_diff_ci95_high,boot_mean_n_config_gt_seed,boot_n_config_gt_seed_ci95_low,boot_n_config_gt_seed_ci95_high,fisher_combined_stat,fisher_combined_p
+gsm8k,main,Qwen/Qwen2.5-1.5B-Instruct,3,6.499999999999995,4.133165829145735,2.3668341708542595,True,0.0,0.0,True,True,27,cell,,,,,,,,,,,,,,,,
+gsm8k,main,Qwen/Qwen2.5-3B-Instruct,3,0.5000000000000004,0.5000000000000004,0.0,False,0.6666666666666666,0.6686,False,False,27,cell,,,,,,,,,,,,,,,,
+gsm8k,main,Qwen/Qwen2.5-7B-Instruct,3,6.499999999999995,0.5000000000000004,5.999999999999995,True,0.0,0.0,True,True,27,cell,,,,,,,,,,,,,,,,
+gsm8k,main,meta-llama/Llama-3.2-3B-Instruct,3,2.9497487437185943,0.9497487437185923,2.0000000000000018,True,0.0,0.0,False,False,27,cell,,,,,,,,,,,,,,,,
+gsm_symbolic,main,Qwen/Qwen2.5-1.5B-Instruct,3,3.3333333333333326,6.000000000000005,-2.6666666666666727,False,0.6666666666666666,0.6722,True,False,27,cell,,,,,,,,,,,,,,,,
+gsm_symbolic,main,Qwen/Qwen2.5-3B-Instruct,3,10.666666666666668,3.3333333333333326,7.333333333333335,True,0.0,0.0,True,True,27,cell,,,,,,,,,,,,,,,,
+gsm_symbolic,main,Qwen/Qwen2.5-7B-Instruct,3,13.33333333333333,0.666666666666671,12.666666666666659,True,0.0,0.0,True,True,27,cell,,,,,,,,,,,,,,,,
+gsm_symbolic,p2,Qwen/Qwen2.5-1.5B-Instruct,3,2.0000000000000018,3.9999999999999982,-1.9999999999999962,False,0.8888888888888888,0.6649,False,False,27,cell,,,,,,,,,,,,,,,,
+gsm_symbolic,p2,Qwen/Qwen2.5-3B-Instruct,3,2.0000000000000018,3.3333333333333326,-1.3333333333333308,False,0.6666666666666666,0.668,False,False,27,cell,,,,,,,,,,,,,,,,
+gsm_symbolic,p2,Qwen/Qwen2.5-7B-Instruct,3,6.000000000000005,1.3333333333333308,4.666666666666675,True,0.0,0.0,True,True,27,cell,,,,,,,,,,,,,,,,
+math500,,Qwen/Qwen2.5-1.5B-Instruct,3,2.999999999999992,1.2839195979899465,1.7160804020100455,True,0.0,0.0,False,False,27,cell,,,,,,,,,,,,,,,,
+math500,,Qwen/Qwen2.5-3B-Instruct,3,1.0000000000000009,2.0000000000000018,-1.0000000000000009,False,0.8888888888888888,0.8872,False,False,27,cell,,,,,,,,,,,,,,,,
+math500,,Qwen/Qwen2.5-7B-Instruct,3,1.9999999999999911,0.5000000000000004,1.4999999999999907,True,0.0,0.0,False,False,27,cell,,,,,,,,,,,,,,,,
+math500,,meta-llama/Llama-3.2-3B-Instruct,3,1.0000000000000009,4.499999999999993,-3.499999999999992,False,0.8888888888888888,0.8868,False,False,27,cell,,,,,,,,,,,,,,,,
+,,,,,,1.9821129456807836,,,,,5,,global_summary,14,5,8,0.0004273904708776153,1000,7.048,4.0,10.0,1.9858388992361975,0.49660883679059004,3.425932677110246,8.599,6.0,11.0,445.23582671744396,1.1702381808203418e-76

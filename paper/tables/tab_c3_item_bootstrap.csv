@@ -1,0 +1,4 @@
+contrast,n_bootstrap,n_cells,n_seed_cells,point_mean_pp,boot_mean_pp,ci_low_pp,ci_high_pp,approximation
+CD_minus_seed,1000,14,14,-0.14966220727130639,-0.19684219205677803,-1.0745467811489369,0.6552953458375282,unit_resample_per_benchmark; refit_tau_on_train; mean_over_split_seeds; plug-in sample pools unchanged
+CD_minus_SC3N,1000,14,14,0.8918125122811159,1.011610597961231,-0.046490384149292775,2.0951267241259925,unit_resample_per_benchmark; refit_tau_on_train; mean_over_split_seeds; plug-in sample pools unchanged
+seed_minus_SC3N,1000,14,14,1.0414747195524223,1.2084527900180093,0.38563414382690453,2.1017483992055888,unit_resample_per_benchmark; refit_tau_on_train; mean_over_split_seeds; plug-in sample pools unchanged
