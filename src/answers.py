@@ -382,6 +382,10 @@ def _strip_units(s: str) -> str:
 
 def _canonical_number_string(value: float) -> str:
     """A canonical string so 2.50, 2.5 and 5/2 collapse to the same key."""
+    # Models occasionally emit ``inf`` / ``1e400`` / overflowed fractions.
+    # ``round(inf)`` raises OverflowError and used to kill majority_vote mid-run.
+    if not math.isfinite(value):
+        return "nan" if math.isnan(value) else ("inf" if value > 0 else "-inf")
     if value == 0:  # kills the "-0" vs "0" distinction
         return "0"
     if abs(value - round(value)) < 1e-12:
@@ -456,8 +460,9 @@ def _to_float(s: str) -> Optional[float]:
     m = re.fullmatch(r"(-?)\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}", t)
     if m:
         num, den = _to_float(m.group(2)), _to_float(m.group(3))
-        if num is not None and den not in (None, 0):
-            return -num / den if m.group(1) else num / den
+        if num is not None and den not in (None, 0.0):
+            value = -num / den if m.group(1) else num / den
+            return value if math.isfinite(value) else None
         return None
 
     # Mixed number: "2 1/2"
@@ -466,6 +471,8 @@ def _to_float(s: str) -> Optional[float]:
         whole, num, den = float(m.group(2)), float(m.group(3)), float(m.group(4))
         if den:
             value = whole + num / den
+            if not math.isfinite(value):
+                return None
             return -value if m.group(1) else value
         return None
 
@@ -473,12 +480,16 @@ def _to_float(s: str) -> Optional[float]:
     m = re.fullmatch(r"(-?\d+(?:\.\d+)?)\s*/\s*(-?\d+(?:\.\d+)?)", t)
     if m:
         den = float(m.group(2))
-        return float(m.group(1)) / den if den else None
+        if not den:
+            return None
+        value = float(m.group(1)) / den
+        return value if math.isfinite(value) else None
 
     try:
-        return float(t)
+        value = float(t)
     except ValueError:
         return None
+    return value if math.isfinite(value) else None
 
 
 def _split_list(s: str) -> Optional[List[str]]:
