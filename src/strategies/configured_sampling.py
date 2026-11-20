@@ -22,11 +22,16 @@ Two design points that a reviewer would otherwise catch:
 
 from __future__ import annotations
 
+import logging
+import threading
+import time
 from typing import Any, Dict, List, Optional
 
 from ..generation import Completion, GenerationBackend
 from ..types import Example, GenParams, StrategyResult
 from .base import ReasoningStrategy, register_strategy
+
+log = logging.getLogger(__name__)
 
 
 @register_strategy("configured_sampling", "cdv_corpus")
@@ -69,79 +74,102 @@ class ConfiguredSampling(ReasoningStrategy):
         prompt = self._prompt(example)
         groups: List[List[Completion]] = []
         n_calls = 0
-        if self.batch_calls:
-            # One call with n=N so the prompt is prefilled once and the KV cache is
-            # shared across the N samples. METHOD_SPEC section 4.2 marks this as
-            # mandatory, and it is the single largest throughput win available.
-            groups = backend.generate(
-                [prompt],
-                params.with_(
-                    n=self.n_samples, seed=self.sample_seed(example, params, "corpus")
-                ),
-            )
-            n_calls = 1
-        else:
-            for i in range(self.n_samples):
-                out = backend.generate(
+        # Heartbeat: after generate finishes, vote used to call sympy and could
+        # hang with GPU util=0 and no further runner logs. Emit phase pings so a
+        # Kaggle session shows *where* it stuck.
+        phase = ["generate"]
+        t0 = time.perf_counter()
+        stop_hb = threading.Event()
+
+        def _heartbeat() -> None:
+            while not stop_hb.wait(60.0):
+                log.info(
+                    "still working example=%s phase=%s elapsed=%.0fs",
+                    example.id,
+                    phase[0],
+                    time.perf_counter() - t0,
+                )
+
+        hb = threading.Thread(target=_heartbeat, name="cs-heartbeat", daemon=True)
+        hb.start()
+        try:
+            if self.batch_calls:
+                # One call with n=N so the prompt is prefilled once and the KV cache is
+                # shared across the N samples. METHOD_SPEC section 4.2 marks this as
+                # mandatory, and it is the single largest throughput win available.
+                groups = backend.generate(
                     [prompt],
                     params.with_(
-                        n=1, seed=self.sample_seed(example, params, f"corpus{i}")
+                        n=self.n_samples, seed=self.sample_seed(example, params, "corpus")
                     ),
                 )
-                groups.append(out[0])
-                n_calls += 1
+                n_calls = 1
+            else:
+                for i in range(self.n_samples):
+                    out = backend.generate(
+                        [prompt],
+                        params.with_(
+                            n=1, seed=self.sample_seed(example, params, f"corpus{i}")
+                        ),
+                    )
+                    groups.append(out[0])
+                    n_calls += 1
 
-        from ..prompts import prompt_digest, render_prompt_text
+            from ..prompts import prompt_digest, render_prompt_text
 
-        traces = [c.text for group in groups for c in group]
-        answer, info = self.vote(traces, example)
-        tokens_prompt, tokens_completion = self.tally(groups)
+            phase[0] = "vote"
+            traces = [c.text for group in groups for c in group]
+            answer, info = self.vote(traces, example)
+            phase[0] = "stats"
+            tokens_prompt, tokens_completion = self.tally(groups)
 
-        model_id = str(self.params.get("model_id") or "")
-        rendered, token_ids = render_prompt_text(
-            prompt, model_id=model_id or None
-        )
-        prompt_meta = prompt_digest(rendered)
-        sample_stats = self.per_sample_stats(
-            groups,
-            example=example,
-            traces=traces,
-            rendered_prompt_hash=prompt_meta["rendered_prompt_hash"],
-        )
+            model_id = str(self.params.get("model_id") or "")
+            rendered, token_ids = render_prompt_text(
+                prompt, model_id=model_id or None
+            )
+            prompt_meta = prompt_digest(rendered)
+            sample_stats = self.per_sample_stats(
+                groups,
+                example=example,
+                traces=traces,
+                rendered_prompt_hash=prompt_meta["rendered_prompt_hash"],
+            )
 
-        extra: Dict[str, Any] = dict(info)
-        extra.update(
-            {
-                "elicitation_id": self.elicitation_id,
-                "n_requested": self.n_samples,
-                "temperature": params.temperature,
-                "top_p": params.top_p,
-                "rendered_prompt_hash": prompt_meta["rendered_prompt_hash"],
-                "prompt_length_chars": prompt_meta["prompt_length_chars"],
-                "rendered_prompt": prompt_meta.get("rendered_prompt"),
-                "rendered_token_ids": token_ids,
-                "n_truncated": sum(
-                    1 for g in groups for c in g if c.finish_reason == "length"
-                ),
-                # Extraction failure is its own answer class and must be counted,
-                # never dropped: an inflated failure class biases the modal ceiling
-                # downward (METHOD_SPEC section 4.3).
-                "n_extraction_failures": int(info.get("n_none") or 0),
-                "top_logprobs_available": any(
-                    c.top_logprobs for g in groups for c in g
-                ),
-            }
-        )
-        return StrategyResult(
-            final_answer=answer,
-            reasoning_traces=traces,
-            n_samples=len(traces),
-            tokens_prompt=tokens_prompt,
-            tokens_completion=tokens_completion,
-            n_calls=n_calls,
-            sample_stats=sample_stats,
-            extra=extra,
-        )
+            extra: Dict[str, Any] = dict(info)
+            extra.update(
+                {
+                    "elicitation_id": self.elicitation_id,
+                    "n_requested": self.n_samples,
+                    "temperature": params.temperature,
+                    "top_p": params.top_p,
+                    "rendered_prompt_hash": prompt_meta["rendered_prompt_hash"],
+                    "prompt_length_chars": prompt_meta["prompt_length_chars"],
+                    "rendered_prompt": prompt_meta.get("rendered_prompt"),
+                    "rendered_token_ids": token_ids,
+                    "n_truncated": sum(
+                        1 for g in groups for c in g if c.finish_reason == "length"
+                    ),
+                    # Extraction failure is its own answer class and must be counted,
+                    # never dropped: an inflated failure class biases the modal ceiling
+                    # downward (METHOD_SPEC section 4.3).
+                    "n_extraction_failures": int(info.get("n_none") or 0),
+                    "top_logprobs_available": any(
+                        c.top_logprobs for g in groups for c in g
+                    ),
+                }
+            )
+            return StrategyResult(
+                final_answer=answer,
+                reasoning_traces=traces,
+                n_samples=len(traces),
+                tokens_prompt=tokens_prompt,
+                tokens_completion=tokens_completion,
+                n_calls=n_calls,
+                sample_stats=sample_stats,
+                extra=extra,
+            )
+        finally:
+            stop_hb.set()
 
 
 @register_strategy("greedy_pass")

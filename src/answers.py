@@ -22,21 +22,30 @@ from __future__ import annotations
 
 import logging
 import math
+import os
 import re
+import signal
+from contextlib import contextmanager
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple
 
 log = logging.getLogger(__name__)
 
 #: Bump on any behaviour change: `grade_file` re-grades automatically when it
 #: differs from the version stored in graded.jsonl. Cheap, because grading never
 #: needs the GPU.
-GRADER_VERSION = "1.0.0"
+GRADER_VERSION = "1.0.1"
 
 #: Symbolic inputs longer than this are not handed to sympy. Long strings are
 #: where sympy parsing pathologically hangs, and a hang in the grading pass of a
 #: 200-example run is a wasted session.
 MAX_SYMBOLIC_CHARS = 200
+
+#: Hard wall for a single sympy / math_verify comparison. Without this,
+#: ``majority_vote`` / gold grading can pin a Kaggle session at GPU-util=0
+#: forever on a pathological MATH expression (seen mid seed-expansion).
+#: Override with env ``HARNESS_SYMBOLIC_TIMEOUT`` (seconds); ``0`` disables.
+_DEFAULT_SYMBOLIC_TIMEOUT_S = 2.0
 
 _LETTERS = "ABCDEFGHIJ"
 
@@ -553,6 +562,49 @@ def _looks_like_expression(s: str) -> bool:
     return bool(_EXPRESSION_RE.search(s))
 
 
+def _symbolic_timeout_s() -> float:
+    raw = os.environ.get("HARNESS_SYMBOLIC_TIMEOUT")
+    if raw is None or raw.strip() == "":
+        return _DEFAULT_SYMBOLIC_TIMEOUT_S
+    try:
+        return max(0.0, float(raw))
+    except ValueError:
+        return _DEFAULT_SYMBOLIC_TIMEOUT_S
+
+
+@contextmanager
+def _time_limit(seconds: float) -> Iterator[None]:
+    """Best-effort wall clock limit (Linux/Kaggle: SIGALRM; else no-op)."""
+    if seconds <= 0 or not hasattr(signal, "SIGALRM") or not hasattr(signal, "setitimer"):
+        yield
+        return
+
+    def _handler(signum: int, frame: Any) -> None:  # noqa: ARG001
+        raise TimeoutError("symbolic equality timed out")
+
+    previous = signal.signal(signal.SIGALRM, _handler)
+    signal.setitimer(signal.ITIMER_REAL, float(seconds))
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0.0)
+        signal.signal(signal.SIGALRM, previous)
+
+
+def _antlr_latex_available() -> bool:
+    try:
+        import antlr4  # type: ignore  # noqa: F401
+
+        return True
+    except Exception:
+        return False
+
+
+@lru_cache(maxsize=1)
+def _can_parse_latex() -> bool:
+    return _antlr_latex_available()
+
+
 def _symbolic_equal(a: str, b: str) -> Optional[bool]:
     """Symbolic equivalence, guarded so a pathological input cannot hang grading."""
     if len(a) > MAX_SYMBOLIC_CHARS or len(b) > MAX_SYMBOLIC_CHARS:
@@ -566,6 +618,23 @@ def _symbolic_equal(a: str, b: str) -> Optional[bool]:
     if not ((expr_a and expr_b) or (expr_a and num_b) or (expr_b and num_a)):
         return None
 
+    try:
+        with _time_limit(_symbolic_timeout_s()):
+            return _symbolic_equal_unguarded(a, b)
+    except TimeoutError:
+        log.warning(
+            "symbolic equality timed out after %.1fs on %r vs %r",
+            _symbolic_timeout_s(),
+            a[:80],
+            b[:80],
+        )
+        return None
+    except Exception:  # noqa: BLE001 - never let sympy kill a run
+        log.debug("symbolic equality failed on %r vs %r", a, b, exc_info=True)
+        return None
+
+
+def _symbolic_equal_unguarded(a: str, b: str) -> Optional[bool]:
     mv = _math_verify()
     if mv is not None:
         try:
@@ -585,7 +654,7 @@ def _symbolic_equal(a: str, b: str) -> Optional[bool]:
             return None
         if bool(sp.simplify(ea - eb) == 0):
             return True
-        # An exact form compared against a rounded decimal (\frac{\sqrt{2}}{2}
+        # An exact form compared against a rounded decimal (\frac{\\sqrt{2}}{2}
         # vs 0.7071...) will never simplify to exactly 0, so fall back to a
         # numeric evaluation. The tolerance is tight enough that 1/3 and 0.333
         # still count as different answers.
@@ -626,7 +695,10 @@ def _sympify(sp: Any, s: str) -> Any:
     text = _strip_latex_wrappers(str(s)).strip()
     if not text:
         return None
-    if "\\" in text:
+    # `parse_latex` needs antlr4. Without it, the import path warns and fails;
+    # with a broken antlr install it can hang. Prefer the textual rewrite unless
+    # antlr is actually importable.
+    if "\\" in text and _can_parse_latex():
         try:
             from sympy.parsing.latex import parse_latex  # type: ignore
 
@@ -712,15 +784,20 @@ def majority_vote(
     answers: Sequence[Optional[str]],
     answer_type: str = "math",
     choices: Optional[Sequence[str]] = None,
+    *,
+    strict: bool = False,
 ) -> Tuple[Optional[str], Dict[str, Any]]:
     """Equivalence-aware plurality vote.
 
-    Clustering by equivalence rather than by raw string is what makes the vote
-    correct: "0.5", ".50" and "1/2" are one candidate, not three, and counting
-    them separately would understate self-consistency.
+    Clustering by normalised form (default) matches the paper's offline
+    ``canonical_classes(strict=False)`` path: "0.5", ".50" and "1/2" collapse
+    via ``normalize_answer``, without calling sympy. That matters on MATH-500,
+    where sympy ``simplify`` on a bad extracted string can hang with GPU util
+    at 0 and freeze a seed-expansion session after generate() has finished.
 
-    Ties break by (highest count, then first appearance) - deterministically,
-    never randomly, so a rerun reproduces the same answer.
+    Pass ``strict=True`` to also bridge algebraic forms via
+    ``answers_equivalent`` (sympy / math_verify), subject to the symbolic
+    timeout. Ties break by (highest count, then first appearance).
     """
     clusters: List[Dict[str, Any]] = []
     n_none = 0
@@ -730,9 +807,17 @@ def majority_vote(
             n_none += 1
             continue
         value = str(raw)
+        key = normalize_answer(value, answer_type) or value
         placed = False
         for cluster in clusters:
-            if answers_equivalent(value, cluster["key"], answer_type, choices):
+            if cluster["key"] == key:
+                cluster["count"] += 1
+                cluster["members"].append(value)
+                placed = True
+                break
+            if strict and answers_equivalent(
+                value, cluster["key"], answer_type, choices
+            ):
                 cluster["count"] += 1
                 cluster["members"].append(value)
                 placed = True
@@ -740,7 +825,7 @@ def majority_vote(
         if not placed:
             clusters.append(
                 {
-                    "key": normalize_answer(value, answer_type) or value,
+                    "key": key,
                     "representative": value,
                     "count": 1,
                     "members": [value],
